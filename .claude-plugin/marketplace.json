@@ -1,0 +1,14 @@
+{
+  "name": "eduardo-mods",
+  "description": "Personal Claude Code mods",
+  "owner": {
+    "name": "Eduardo Picolli"
+  },
+  "plugins": [
+    {
+      "name": "clean-view",
+      "source": "./plugins/clean-view",
+      "description": "Hides narration and tool output, showing each turn as a numbered step list in Catppuccin colors"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "name": "clean-view",
+  "version": "0.1.0",
+  "description": "Hides narration and tool output, showing each turn as a numbered step list in Catppuccin colors",
+  "author": {
+    "name": "Eduardo Picolli"
+  },
+  "types": "./types/index.d.ts"
+}
