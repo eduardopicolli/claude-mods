@@ -11,10 +11,12 @@ Personal Claude Code mods, published as a single plugin marketplace (`eduardo-mo
 At the prompt of a Claude Code terminal session:
 
 ```
-/plugin install clean-view --marketplace <owner>/claude-mods
+/plugin install clean-view --marketplace eduardopicolli/claude-mods
 ```
 
 Answer `y` to add the marketplace, then pick the **user** scope. The plugin is active right away and in every later session.
+
+The repository is private: the machine needs GitHub access to it (e.g. `gh auth login`).
 
 Or from a local clone:
 
