@@ -4,7 +4,7 @@ Personal Claude Code mods, published as a single plugin marketplace (`eduardo-mo
 
 | Plugin | Description |
 | --- | --- |
-| [clean-view](plugins/clean-view) | Hides narration and tool output, showing each turn as a numbered step list in Catppuccin colors |
+| [clean-view](plugins/clean-view) | Hides tool calls and shows a calm checklist above the prompt (plan, current step, progress), in Catppuccin colors. Toggle with `/simple on\|off` or the band's button |
 
 ## Install
 

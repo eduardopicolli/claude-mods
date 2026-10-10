@@ -8,7 +8,7 @@
     {
       "name": "clean-view",
       "source": "./plugins/clean-view",
-      "description": "Hides narration and tool output, showing each turn as a numbered step list in Catppuccin colors"
+      "description": "Hides tool calls and shows a calm checklist above the prompt, in Catppuccin colors"
     }
   ]
 }

@@ -1,21 +1,36 @@
-export type Plan = {
+export type TaskStatus = 'done' | 'active' | 'upcoming'
+
+export type Task = {
+  id: string
+  name: string
+  status: TaskStatus
+  percent: number
+  hasReported: boolean
+}
+
+export type Phase = 'working' | 'needsYou' | 'stuck' | 'stopped' | 'done'
+
+export type Checklist = {
+  /** Grows with each new job, so a late answer for an older job is ignored. */
+  jobId: number
   title: string
-  steps: string[]
-  current: number
-  isDone: boolean
+  phase: Phase
+  tasks: Task[]
+  /** False while the rows are still the placeholders shown before a plan. */
+  hasPlan: boolean
+  needsYouReason: string | null
+  stuckReason: string | null
   startedAt: number
-  endedAt: number | null
-  calls: number[]
-  action: string
+  finishedAt: number | null
+  isCollapsed: boolean
 }
 
 declare module 'claude-code' {
   interface PluginState {
     'clean-view': {
-      isOn: boolean
-      narration: string[]
-      plan: Plan | null
-      now: number
+      cleanViewEnabled: boolean
+      checklist: Checklist | null
+      tick: number
     }
   }
 }
