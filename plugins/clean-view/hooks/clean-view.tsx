@@ -3,22 +3,20 @@ import type { EngineInterface, On, Timer } from 'claude-code'
 
 import type { Checklist, Phase, Task } from '../types'
 
-// Catppuccin Mocha
+// Slack Theme Dark Mode (VS Code)
 const C = {
-  green: '#a6e3a1',
-  teal: '#94e2d5',
-  red: '#f38ba8',
-  maroon: '#eba0ac',
-  pink: '#f5c2e7',
-  peach: '#fab387',
-  yellow: '#f9e2af',
-  mauve: '#cba6f7',
-  lavender: '#b4befe',
-  text: '#cdd6f4',
-  subtext: '#a6adc8',
-  overlay: '#6c7086',
-  surface: '#45475a',
-  crust: '#11111b',
+  green: '#2EB67D',
+  teal: '#1D978D',
+  red: '#E01E5A',
+  yellow: '#ECB22E',
+  blue: '#0077B5',
+  link: '#1D9BD1',
+  cyan: '#36C5F0',
+  text: '#E6E6E6',
+  subtext: '#ABABAB',
+  overlay: '#7A7A7A',
+  surface: '#404040',
+  crust: '#141414',
 }
 
 const PLAN_TOOL = 'mcp__clean-view__plan_steps'
@@ -538,10 +536,10 @@ export const registerCleanView = (on: On) => {
         case 'needsYou':
           return (
             <Text wrap="truncate-end">
-              <Text backgroundColor={C.peach} color={C.crust} bold>
+              <Text backgroundColor={C.yellow} color={C.crust} bold>
                 {' Precisa de você '}
               </Text>
-              <Text color={C.peach}>{` ${c.needsYouReason ?? SAY.needsOk}`}</Text>
+              <Text color={C.yellow}>{` ${c.needsYouReason ?? SAY.needsOk}`}</Text>
             </Text>
           )
         case 'stuck':
@@ -556,7 +554,7 @@ export const registerCleanView = (on: On) => {
         case 'stopped':
           return (
             <Text wrap="truncate-end">
-              <Text color={C.maroon} bold>
+              <Text color={C.overlay} bold>
                 {'■ Parado'}
               </Text>
               <Text color={C.subtext}>{` · ${c.title} · você apertou Esc`}</Text>
@@ -574,7 +572,7 @@ export const registerCleanView = (on: On) => {
         default:
           return (
             <Text wrap="truncate-end">
-              <Text color={C.mauve} bold>
+              <Text color={C.link} bold>
                 {c.title}
               </Text>
               <Text color={C.subtext}>{` · ${elapsed}`}</Text>
@@ -594,7 +592,7 @@ export const registerCleanView = (on: On) => {
 
     if (c.phase === 'done' && c.isCollapsed) return header
 
-    const accent = { working: C.mauve, needsYou: C.peach, stuck: C.red, stopped: C.overlay, done: C.green }[c.phase]
+    const accent = { working: C.blue, needsYou: C.yellow, stuck: C.red, stopped: C.overlay, done: C.green }[c.phase]
     const inner = Math.max(20, e.props.bodyColumns - 4)
     const room = inner - 2 - 1 - METER - 2 - LABEL_W
     const longest = Math.max(...c.tasks.map(t => t.name.length), 6)
@@ -609,13 +607,13 @@ export const registerCleanView = (on: On) => {
           cells.push({ glyph: '█', color: blend([C.green, C.teal], at) })
         } else if (t.status === 'active' && t.hasReported) {
           const isFull = k < Math.round(t.percent / 10)
-          cells.push(isFull ? { glyph: '█', color: blend([C.mauve, C.pink], at) } : { glyph: '░', color: C.surface })
+          cells.push(isFull ? { glyph: '█', color: blend([C.blue, C.cyan], at) } : { glyph: '░', color: C.surface })
         } else if (t.status === 'active') {
           // No percent yet: a short bright sweep moves across the meter.
           const head = (frame % (METER + 3)) - 1
           const gap = head - k
           const isLit = gap >= 0 && gap < 3
-          cells.push(isLit ? { glyph: '█', color: [C.pink, C.mauve, C.lavender][gap]! } : { glyph: '░', color: C.surface })
+          cells.push(isLit ? { glyph: '█', color: [C.cyan, C.link, C.blue][gap]! } : { glyph: '░', color: C.surface })
         } else {
           cells.push({ glyph: '░', color: C.surface })
         }
@@ -638,7 +636,7 @@ export const registerCleanView = (on: On) => {
           ? C.green
           : !isActive
             ? C.overlay
-            : { working: C.pink, needsYou: C.peach, stuck: C.red, stopped: C.overlay, done: C.green }[c.phase]
+            : { working: C.link, needsYou: C.yellow, stuck: C.red, stopped: C.overlay, done: C.green }[c.phase]
       const label =
         t.status === 'done'
           ? 'Concluído'

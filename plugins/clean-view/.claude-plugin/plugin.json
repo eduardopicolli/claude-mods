@@ -1,7 +1,7 @@
 {
   "name": "clean-view",
   "version": "0.2.0",
-  "description": "Hides tool calls and shows a calm checklist above the prompt, in Catppuccin colors",
+  "description": "Hides tool calls and shows a calm checklist above the prompt, in Slack Dark Mode colors",
   "author": {
     "name": "Eduardo Picolli"
   },
