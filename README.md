@@ -1,6 +1,6 @@
 # claude-mods
 
-Personal Claude Code mods, published as a single plugin marketplace (`eduardo-mods`).
+Personal Claude Code mods, published as a single plugin marketplace (`claude-mods`).
 
 | Plugin | Description |
 | --- | --- |
@@ -27,7 +27,7 @@ Or from a local clone:
 ## Update
 
 ```bash
-claude plugin update clean-view@eduardo-mods
+claude plugin update clean-view@claude-mods
 ```
 
 then `/reload-plugins` in the session.
