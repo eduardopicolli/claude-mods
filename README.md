@@ -16,7 +16,6 @@ At the prompt of a Claude Code terminal session:
 
 Answer `y` to add the marketplace, then pick the **user** scope. The plugin is active right away and in every later session.
 
-The repository is private: the machine needs GitHub access to it (e.g. `gh auth login`).
 
 Or from a local clone:
 
