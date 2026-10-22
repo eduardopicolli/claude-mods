@@ -16,6 +16,7 @@ const C = {
   subtext: '#ABABAB',
   overlay: '#7A7A7A',
   surface: '#404040',
+  track: '#2E2E2E',
   crust: '#141414',
 }
 
@@ -115,6 +116,15 @@ const blend = (stops: string[], t: number) => {
   const ch = (h: string, k: number) => parseInt(h.slice(1 + k * 2, 3 + k * 2), 16)
   const mix = [0, 1, 2].map(k => Math.round(ch(a, k) + (ch(b, k) - ch(a, k)) * f))
   return '#' + mix.map(v => v.toString(16).padStart(2, '0')).join('')
+}
+
+// The meter gradient of each phase, so a paused or failed step stops looking busy.
+const GRAD: Record<Phase, string[]> = {
+  working: [C.blue, C.cyan],
+  needsYou: [C.yellow, blend([C.yellow, '#FFFFFF'], 0.45)],
+  stuck: [C.red, blend([C.red, '#FFFFFF'], 0.4)],
+  stopped: [C.overlay, C.subtext],
+  done: [C.green, C.teal],
 }
 
 let nextId = 0
@@ -600,28 +610,27 @@ export const registerCleanView = (on: On) => {
     const firstUpcoming = c.tasks.findIndex(t => t.status === 'upcoming')
 
     const meter = (t: Task) => {
-      const cells: { glyph: string; color: string }[] = []
+      const cells: string[] = []
+      const grad = GRAD[t.status === 'done' ? 'done' : c.phase]
       for (let k = 0; k < METER; k++) {
         const at = k / (METER - 1)
         if (t.status === 'done') {
-          cells.push({ glyph: '█', color: blend([C.green, C.teal], at) })
+          cells.push(blend(grad, at))
         } else if (t.status === 'active' && t.hasReported) {
-          const isFull = k < Math.round(t.percent / 10)
-          cells.push(isFull ? { glyph: '█', color: blend([C.blue, C.cyan], at) } : { glyph: '░', color: C.surface })
+          cells.push(k < Math.round(t.percent / 10) ? blend(grad, at) : C.track)
         } else if (t.status === 'active') {
-          // No percent yet: a short bright sweep moves across the meter.
+          // No percent yet: a short sweep, bright at its head, moves across the meter.
           const head = (frame % (METER + 3)) - 1
           const gap = head - k
-          const isLit = gap >= 0 && gap < 3
-          cells.push(isLit ? { glyph: '█', color: [C.cyan, C.link, C.blue][gap]! } : { glyph: '░', color: C.surface })
+          cells.push(gap >= 0 && gap < 3 ? blend(grad, 1 - gap / 2) : C.track)
         } else {
-          cells.push({ glyph: '░', color: C.surface })
+          cells.push(C.track)
         }
       }
       return (
         <Text>
-          {cells.map(cell => (
-            <Text color={cell.color}>{cell.glyph}</Text>
+          {cells.map(color => (
+            <Text color={color}>█</Text>
           ))}
         </Text>
       )
