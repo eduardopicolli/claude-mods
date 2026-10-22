@@ -39,6 +39,7 @@ const FIRST_TITLE = 'Trabalhando no seu pedido'
 const FALLBACK_NAME = 'Trabalhando nisso'
 const MAX_NAME = 40
 const METER = 10
+const SWEEP = 5
 const LABEL_W = 11
 const FRAME_MS = 250
 const COLLAPSE_MS = 5000
@@ -619,10 +620,10 @@ export const registerCleanView = (on: On) => {
         } else if (t.status === 'active' && t.hasReported) {
           cells.push(k < Math.round(t.percent / 10) ? blend(grad, at) : C.track)
         } else if (t.status === 'active') {
-          // No percent yet: a short sweep, bright at its head, moves across the meter.
-          const head = (frame % (METER + 3)) - 1
+          // No percent yet: a sweep, bright at its head, fades into the track so its edges never cut hard.
+          const head = frame % (METER + SWEEP)
           const gap = head - k
-          cells.push(gap >= 0 && gap < 3 ? blend(grad, 1 - gap / 2) : C.track)
+          cells.push(gap >= 0 && gap < SWEEP ? blend([C.track, ...grad], 1 - gap / SWEEP) : C.track)
         } else {
           cells.push(C.track)
         }
