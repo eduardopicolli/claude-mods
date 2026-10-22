@@ -4,7 +4,7 @@ Personal Claude Code mods, published as a single plugin marketplace (`claude-mod
 
 | Plugin | Description |
 | --- | --- |
-| [clean-view](plugins/clean-view) | Hides tool calls and shows a calm checklist above the prompt (plan, current step, progress), in Slack Dark Mode colors. Toggle with `/simple on\|off` or the band's button |
+| [clean-view](plugins/clean-view) | Hides tool calls and shows a calm checklist above the prompt (plan, current step, progress), in Dark Modern Soft colors. Toggle with `/simple on\|off` or the band's button |
 
 ## Install
 

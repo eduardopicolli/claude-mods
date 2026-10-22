@@ -3,21 +3,21 @@ import type { EngineInterface, On, Timer } from 'claude-code'
 
 import type { Checklist, Phase, Task } from '../types'
 
-// Slack Theme Dark Mode (VS Code)
+// Dark Modern Soft (VS Code)
 const C = {
-  green: '#2EB67D',
-  teal: '#1D978D',
-  red: '#E01E5A',
-  yellow: '#ECB22E',
-  blue: '#0077B5',
-  link: '#1D9BD1',
-  cyan: '#36C5F0',
-  text: '#E6E6E6',
-  subtext: '#ABABAB',
-  overlay: '#7A7A7A',
-  surface: '#404040',
-  track: '#2E2E2E',
-  crust: '#141414',
+  green: '#6AC483',
+  teal: '#4FB0A6',
+  red: '#E4506F',
+  yellow: '#E8BD5F',
+  blue: '#4690D2',
+  link: '#51AED6',
+  cyan: '#68CBE6',
+  text: '#D4D6DD',
+  subtext: '#AEB0B6',
+  overlay: '#84858A',
+  surface: '#3B3C3E',
+  track: '#2E2F33',
+  crust: '#1D1E22',
 }
 
 const PLAN_TOOL = 'mcp__clean-view__plan_steps'
