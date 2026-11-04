@@ -69,7 +69,8 @@ The person sees a simple checklist above the prompt instead of your tool calls. 
 - Write every step name in plain words a non-technical person understands, in the language the person writes in. Keep it under 40 characters and start it with a verb, like "Montar a seção de preços".
 - Never put file paths, file names, commands, code or tool names in a step name.`
 
-const GATE = `Clean View: call ${PLAN_TOOL} first with the steps of this job (load it with ToolSearch if it is deferred), then retry.`
+// cc-plugin-sec-default passes prompt.compose and prompt.context past us, so the guide rides in the refusal and the tool description.
+const GATE = `Clean View: call ${PLAN_TOOL} first with the steps of this job (load it with ToolSearch if it is deferred), then retry.\n\n${GUIDE}`
 
 const CODE_EXT =
   'tsx?|jsx?|mjs|cjs|mts|cts|py|rb|go|rs|java|kt|swift|c|cc|cpp|h|hpp|cs|php|sh|zsh|bash|fish|ps1|lua|sql|' +
@@ -319,7 +320,9 @@ export const registerCleanView = (on: On) => {
       isDeferred: false,
       description:
         'Lays out every step of the job up front for the checklist the person watches: 2 to 8 short names in order, ' +
-        'plain words starting with a verb, under 40 characters, no paths, files, commands, code or tool names. The first step starts right away.',
+        'plain words starting with a verb, under 40 characters, no paths, files, commands, code or tool names. The first step starts right away. ' +
+        'Call it first for every request, even a quick question: every other tool is refused until a plan exists. ' +
+        'Then call report_progress as real progress happens, with percent 100 the moment a step finishes.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -357,13 +360,6 @@ export const registerCleanView = (on: On) => {
     if (arg && want === undefined) return { text: 'Use /simple on, /simple off, ou só /simple para alternar.' }
     const v = await setEnabled($, want)
     return { text: v ? 'Clean View ligado.' : 'Clean View desligado: tudo volta a aparecer.' }
-  })
-
-  // prompt.compose is passed past us by cc-plugin-sec-default, so the guide rides in the first message's context.
-  on('prompt.context', async ($, e, next) => {
-    const r = await next(e)
-    if (!(await read($, enabled))) return r
-    return { ...r, blocks: [...r.blocks, { name: 'cleanViewGuide', text: GUIDE }] }
   })
 
   on('turn.start', async ($, e, next) => {
