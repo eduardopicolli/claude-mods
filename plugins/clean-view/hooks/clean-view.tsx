@@ -44,6 +44,7 @@ const LABEL_W = 11
 const FRAME_MS = 250
 const COLLAPSE_MS = 5000
 const FAILS_TO_STUCK = 3
+const NUDGE_EVERY = 6
 
 const SAY = {
   needsOk: 'O Claude precisa do seu OK para continuar',
@@ -67,7 +68,11 @@ The person sees a simple checklist above the prompt instead of your tool calls. 
 - Then call \`${REPORT_TOOL}\` as real progress happens, and with percent 100 the moment a step finishes.
 - If this session has TodoWrite or TaskCreate, your to-do list can be the plan instead.
 - Write every step name in plain words a non-technical person understands, in the language the person writes in. Keep it under 40 characters and start it with a verb, like "Montar a seção de preços".
-- Never put file paths, file names, commands, code or tool names in a step name.`
+- Never put file paths, file names, commands, code or tool names in a step name.
+- Name the concrete work, not generic phases like "Executar a fase atual".`
+
+// Rides as a reminder on the tool result, not a deny, so it costs no extra round trip.
+const NUDGE = `Clean View: the checklist has not moved in a while. Send ${REPORT_TOOL} together with your next tool calls.`
 
 // cc-plugin-sec-default passes prompt.compose and prompt.context past us, so the guide rides in the refusal and the tool description.
 const GATE = `Clean View: call ${PLAN_TOOL} first with the steps of this job (load it with ToolSearch if it is deferred), then retry.\n\n${GUIDE}`
@@ -259,6 +264,7 @@ const toText = (text: string) => ({ result: [{ type: 'text' as const, text }] })
 
 let timer: Timer | null = null
 let failStreak = 0
+let sinceReport = 0
 let apiError: string | null = null
 
 // The frame clock runs only while a job works or waits on the person.
@@ -321,7 +327,7 @@ export const registerCleanView = (on: On) => {
       description:
         'Lays out every step of the job up front for the checklist the person watches: 2 to 8 short names in order, ' +
         'plain words starting with a verb, under 40 characters, no paths, files, commands, code or tool names. The first step starts right away. ' +
-        'Call it first for every request, even a quick question: every other tool is refused until a plan exists. ' +
+        'Name the concrete work, not generic phases. Call it first for every request, even a quick question: every other tool is refused until a plan exists. ' +
         'Then call report_progress as real progress happens, with percent 100 the moment a step finishes.',
       inputSchema: {
         type: 'object',
@@ -365,10 +371,12 @@ export const registerCleanView = (on: On) => {
   on('turn.start', async ($, e, next) => {
     const text = e.text.trim()
     const c = await read($, checklist)
-    const isReply = c?.phase === 'needsYou' && c.hasPlan && c.tasks.some(t => t.status !== 'done')
+    // A turn that just ended with steps open is waiting, not asking: a new message there is a new job.
+    const isReply = c?.phase === 'needsYou' && c.needsYouReason !== SAY.waiting && c.hasPlan && c.tasks.some(t => t.status !== 'done')
     if (text && !text.startsWith('/') && !isReply) {
       const jobId = (c?.jobId ?? 0) + 1
       failStreak = 0
+      sinceReport = 0
       apiError = null
       await change($, () => newJob(jobId, Date.now()))
       if (await read($, enabled)) $.clock.after(1, () => void nameJob($, jobId, text))
@@ -386,12 +394,18 @@ export const registerCleanView = (on: On) => {
     if (tool === PLAN_TOOL) {
       const names = (Array.isArray(args.steps) ? args.steps : []).map(cleanName).slice(0, 8)
       if (names.length === 0) return { deny: 'plan_steps needs at least one step name.' }
-      if (!e.agentId) await change($, c => applyPlan(ensure(c), names))
+      if (!e.agentId) {
+        sinceReport = 0
+        await change($, c => applyPlan(ensure(c), names))
+      }
       return toText(`Planned ${names.length} steps. The first one has started.`)
     }
     if (tool === REPORT_TOOL) {
       const percent = Math.round(Math.min(100, Math.max(0, Number(args.percent) || 0)))
-      if (!e.agentId) await change($, c => applyReport(ensure(c), cleanName(args.task), percent))
+      if (!e.agentId) {
+        sinceReport = 0
+        await change($, c => applyReport(ensure(c), cleanName(args.task), percent))
+      }
       return toText(`Progress noted: ${percent}%.`)
     }
     if (e.agentId) return next(e)
@@ -405,7 +419,7 @@ export const registerCleanView = (on: On) => {
       await change($, x => x && working(x))
     }
 
-    const r = await next(e)
+    let r = await next(e)
     if (r.deny !== undefined) return r
 
     if (r.isError) {
@@ -419,6 +433,11 @@ export const registerCleanView = (on: On) => {
     }
 
     failStreak = 0
+    if (tool === 'TodoWrite' || tool === 'TaskCreate' || tool === 'TaskUpdate') {
+      sinceReport = 0
+    } else if (++sinceReport % NUDGE_EVERY === 0 && c?.hasPlan && c.phase !== 'done' && (await read($, enabled))) {
+      r = { ...r, context: [...(r.context ?? []), NUDGE] }
+    }
     if (tool === 'TodoWrite' && Array.isArray(args.todos)) {
       await change($, x => applyTodos(ensure(x), args.todos as Todo[]))
     } else if (tool === 'TaskCreate') {
