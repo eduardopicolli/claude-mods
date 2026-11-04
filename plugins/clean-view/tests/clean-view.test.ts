@@ -64,12 +64,14 @@ test('a to-do list and a 60% report draw done, current, next and queued rows', a
 test('a permission prompt shows Precisa de você', async ($, on) => {
   mock.clock(on)
   on('turn.start', (_$, e) => ({ turnId: e.turnId }))
-  on('classic.Notification', () => ({}))
+  on('tool.check', () => ({ decision: 'ask' as const }))
   await $.turn.start({ text: 'Monte minha landing page', turnId: 't1' })
-  await $.classic.Notification({
-    message: 'Claude needs your permission to use Bash',
-    notification_type: 'permission_prompt',
-  })
+  await $.tool.check({
+    tool: 'Bash',
+    input: { command: 'ls' },
+    tool_use_id: 'toolu_1',
+    approver: 'person',
+  } as never)
   for (const surface of SURFACES) {
     const ui = await $.ui.mount(band(surface))
     expect(await ui.find({ type: 'Text', text: /Precisa de você/ })).toBeDefined()

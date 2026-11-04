@@ -359,10 +359,11 @@ export const registerCleanView = (on: On) => {
     return { text: v ? 'Clean View ligado.' : 'Clean View desligado: tudo volta a aparecer.' }
   })
 
-  on('prompt.compose', async ($, e, next) => {
+  // prompt.compose is passed past us by cc-plugin-sec-default, so the guide rides in the first message's context.
+  on('prompt.context', async ($, e, next) => {
     const r = await next(e)
     if (!(await read($, enabled))) return r
-    return { sections: [...r.sections, { id: 'clean-view:guide', text: GUIDE, scope: 'session' as const }] }
+    return { ...r, blocks: [...r.blocks, { name: 'cleanViewGuide', text: GUIDE }] }
   })
 
   on('turn.start', async ($, e, next) => {
@@ -436,15 +437,13 @@ export const registerCleanView = (on: On) => {
     return r
   }).catch(($, e, next) => next(e))
 
-  on('classic.Notification', async ($, e, next) => {
-    const isAsking =
-      e.notification_type === 'permission_prompt' ||
-      e.notification_type === 'elicitation_dialog' ||
-      /permission/i.test(e.message)
-    if (isAsking) {
+  // classic.Notification is passed past us by cc-plugin-sec-default; the verdict tells us a person will be asked.
+  on('tool.check', async ($, e, next) => {
+    const r = await next(e)
+    if (r.decision === 'ask' && e.approver === 'person' && e.tool_use_id && !e.agentId) {
       await change($, c => (c && c.phase !== 'done' ? { ...working(c), phase: 'needsYou', needsYouReason: SAY.needsOk } : c))
     }
-    return next(e)
+    return r
   })
 
   on('classic.StopFailure', async ($, e, next) => {
